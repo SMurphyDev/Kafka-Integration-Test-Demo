@@ -1,16 +1,12 @@
 package com.smurphydev.fixtures;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Component;
 
-@Component
 public class GenericTestProducer<K, V> {
 
   private final KafkaTemplate<K, V> template;
 
-  @Autowired
   public GenericTestProducer(final KafkaTemplate<K, V> template) {
     this.template = template;
   }

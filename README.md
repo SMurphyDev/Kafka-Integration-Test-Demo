@@ -8,6 +8,7 @@ The entry point into the app is the PersonConsumer class. It is a bog standard K
 
 ```json
 {
+    "id": "959e366f-6103-4be6-9d37-152407ac533e",
     "firstname": "Stephen",
     "lastname": "Murphy",
     "age": 186
@@ -26,21 +27,30 @@ Due to `@DirtiesContext` giving me a new broker instance each run I need to crea
 
 ### The Tear Down
 
-This is pretty forward, I close the listner and set `personConsumer` to null so the garbage collector can clean it up.
+This is pretty forward, I close the listner and set `personConsumer` & `personProducer` to null so the garbage collector can clean them up.
 
 ### The Test
 
-I create a person object and use `GenericProducer` to write to *in-person*, the topic our application consumer is listening on. At this point `PersonConsumer` reads the message, logs it, and writes to *out-person*. The topic `GenericTestConsumer` is listening on! This lets me retreive the message and compare it to the origanal input `Person`.
+I create a person object and use `GenericTestProducer` to write to *in-person*, the topic our application consumer is listening on. At this point `PersonConsumer` reads the message, logs it, and writes to *out-person*. The topic `GenericTestConsumer` is listening on! This lets me retreive the message and compare it to the origanal input `Person`.
+
+### The GenericTestProducerFactory
+
+This class handles the configuration for `GenericTestProducer`. It gives us two advantages:
+
+1. I can choose whether to depend on an auto configured `ConsumerFactory` to create my test consumer or create a new one based on a provided config map.
+2. I can easily create a `GenericTestConsumer` any key and value types.
 
 ### The GenericTestProducer
 
-This class is just a thin wrapper around `KafkaTemplate`. It takes an object of type T and creates a `ProducerRecord<String, T>` where the string is a randon UUID which will be passed to kafka as a key. This could part of the application logic replacing `PersonConsumer`. In an actual production app I would have more business logic in `PersonConsumer`, so I decided to keep them separate. That and reusing business logic to drive tests is the kind of coupling that can bite you in the ass down the line.
+This class is just a thin wrapper around `KafkaTemplate` and creates a `ProducerRecord<K, T>`. This could part of the application logic replacing `PersonConsumer`. In an actual production app I would have more business logic in `PersonConsumer`, so I decided to keep them separate. That and reusing business logic to drive tests is the kind of coupling that can bite you in the ass down the line.
 
 ### The GenericTestConsumerFactory
 
 The `GenericTestConsumerFactory` allows me to create a `KafkaMessageListnerContainer` relying on the auto configured `ConsumerFactory` for it's base configuration, with one exception: groupId. It is important for your test consumer and application consumer to be in different consumer groups as by default consumers are assigned one per group/topic/partition.
 
 The `KafkaMessageListnerContainer` is the piece which actually listens on the topic we are testing. On it's own though its not very useful. I only configure it here, in the `GenericTestConsumer` I've built the additional machinery which makes this valuable.
+
+Like the `GenericTestProducerFactory` it gives me options for configuring the consumer.
 
 ### The GenericTestConsumer
 
@@ -52,4 +62,6 @@ Finally `getNextRecord()` polls the queue for the records recieved, waiting up t
 
 ### Further Thoughts
 
-In general, this strategy tightly couples the configuration of the application listener & producer to their test counterparts. It works because there is exactly one kafka broker and one serialization format. It would not work if I was reading JSON and writing avro, for example. The solution would be to modify the `GenericTestConsumerFactory` & `GenericTestProducer` to accept config maps from the calling test class, which I may look into in future.
+In general, my initial strategy tightly couples the configuration of the application listener & producer to their test counterparts. It works because there is exactly one kafka broker and one serialization format. It would not work if I was reading JSON and writing avro, for example.
+
+As a result I've add the `KafkaIntegrationWithExplicitConfigTest` which covers exactly the same test scenario, but shows how to provide explicit configurations for the test consumers/producers.
