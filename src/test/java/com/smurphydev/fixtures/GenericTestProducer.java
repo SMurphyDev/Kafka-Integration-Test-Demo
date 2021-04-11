@@ -1,24 +1,22 @@
 package com.smurphydev.fixtures;
 
-import java.util.UUID;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GenericTestProducer<T> {
+public class GenericTestProducer<K, V> {
 
-  private final KafkaTemplate<String, T> template;
+  private final KafkaTemplate<K, V> template;
 
   @Autowired
-  public GenericTestProducer(final KafkaTemplate<String, T> template) {
+  public GenericTestProducer(final KafkaTemplate<K, V> template) {
     this.template = template;
   }
 
-  public ProducerRecord<String, T> sendMessage(final String topic, final T message) {
-    String key = UUID.randomUUID().toString();
-    ProducerRecord<String, T> record = new ProducerRecord<>(topic, key, message);
+  public ProducerRecord<K, V> sendMessage(final String topic, final K key, final V value) {
+    ProducerRecord<K, V> record = new ProducerRecord<>(topic, key, value);
     template.send(record);
 
     return record;

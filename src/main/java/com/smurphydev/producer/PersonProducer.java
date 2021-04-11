@@ -11,20 +11,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class PersonProducer {
 
-  private final KafkaTemplate<String, Person> personTemplate;
+  private final KafkaTemplate<UUID, Person> personTemplate;
   private final ConfigProperties config;
 
   @Autowired
   public PersonProducer(
-      final KafkaTemplate<String, Person> personTemplate, final ConfigProperties config) {
+      final KafkaTemplate<UUID, Person> personTemplate, final ConfigProperties config) {
     this.personTemplate = personTemplate;
     this.config = config;
   }
 
   public void sendMessage(final Person person) {
-    String key = UUID.randomUUID().toString();
-    ProducerRecord<String, Person> record =
-        new ProducerRecord<>(config.getProducerTopic(), key, person);
+    ProducerRecord<UUID, Person> record =
+        new ProducerRecord<>(config.getProducerTopic(), person.getId(), person);
     personTemplate.send(record);
   }
 }

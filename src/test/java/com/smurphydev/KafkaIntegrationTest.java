@@ -7,6 +7,7 @@ import com.smurphydev.dto.Person;
 import com.smurphydev.fixtures.GenericTestConsumer;
 import com.smurphydev.fixtures.GenericTestConsumerFactory;
 import com.smurphydev.fixtures.GenericTestProducer;
+import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.AfterEach;
@@ -25,13 +26,13 @@ public class KafkaIntegrationTest {
 
   @Autowired private ConfigProperties config;
 
-  @Autowired private GenericTestProducer<Person> personProducer;
+  @Autowired private GenericTestProducer<UUID, Person> personProducer;
 
-  @Autowired private GenericTestConsumerFactory<Person> personConsumerFactory;
+  @Autowired private GenericTestConsumerFactory<UUID, Person> personConsumerFactory;
 
   @Autowired private EmbeddedKafkaBroker embeddedKafkaBroker;
 
-  private GenericTestConsumer<Person> personConsumer;
+  private GenericTestConsumer<UUID, Person> personConsumer;
 
   @BeforeEach
   public void setUp() {
@@ -52,6 +53,7 @@ public class KafkaIntegrationTest {
 
   private Person createDummy() {
     Person person = new Person();
+    person.setId(UUID.randomUUID());
     person.setFirstname("Stephen");
     person.setLastname("Murphy");
     person.setAge(29);
@@ -64,10 +66,11 @@ public class KafkaIntegrationTest {
     Person person = createDummy();
 
     // We produce to the consumer topic as this is the topic our application reads from
-    ProducerRecord<String, Person> producerRecord =
-        personProducer.sendMessage(config.getConsumerTopic(), person);
-    ConsumerRecord<String, Person> consumerRecord = personConsumer.getNextRecord();
+    ProducerRecord<UUID, Person> producerRecord =
+        personProducer.sendMessage(config.getConsumerTopic(), person.getId(), person);
+    ConsumerRecord<UUID, Person> consumerRecord = personConsumer.getNextRecord();
 
+    assertEquals(producerRecord.key(), consumerRecord.key());
     assertEquals(producerRecord.value(), consumerRecord.value());
   }
 }

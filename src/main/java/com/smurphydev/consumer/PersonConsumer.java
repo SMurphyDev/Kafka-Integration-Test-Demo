@@ -3,6 +3,7 @@ package com.smurphydev.consumer;
 import com.smurphydev.config.ConfigProperties;
 import com.smurphydev.dto.Person;
 import com.smurphydev.producer.PersonProducer;
+import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +25,14 @@ class PersonConsumer {
   }
 
   @KafkaListener(topics = "${com.smurphydev.consumer-topic}")
-  public void consumePerson(ConsumerRecord<String, Person> record) {
+  public void consumePerson(ConsumerRecord<UUID, Person> record) {
     StringBuilder message = new StringBuilder();
     message.append("Consumed [key : value] from topic ");
     message.append(config.getConsumerTopic());
     message.append("\n sending to topic ");
     message.append(config.getProducerTopic());
     message.append(" :\n[");
-    message.append(record.key());
+    message.append(record.key().toString());
     message.append(" : ");
     message.append(record.value().toString());
     message.append(" ]");

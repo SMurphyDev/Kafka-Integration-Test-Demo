@@ -7,19 +7,20 @@ import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GenericTestConsumerFactory<T> {
+public class GenericTestConsumerFactory<K, V> {
 
-  private final ConsumerFactory<String, T> consumerFactory;
+  private final ConsumerFactory<K, V> consumerFactory;
 
   @Autowired
-  public GenericTestConsumerFactory(final ConsumerFactory<String, T> consumerFactory) {
+  public GenericTestConsumerFactory(final ConsumerFactory<K, V> consumerFactory) {
     this.consumerFactory = consumerFactory;
   }
 
-  public GenericTestConsumer<T> getTestConsumer(String groupId, String topic, int partitionCount) {
+  public GenericTestConsumer<K, V> getTestConsumer(
+      String groupId, String topic, int partitionCount) {
     ContainerProperties containerProperties = new ContainerProperties(topic);
     containerProperties.setGroupId(groupId);
-    KafkaMessageListenerContainer<String, T> container =
+    KafkaMessageListenerContainer<K, V> container =
         new KafkaMessageListenerContainer<>(consumerFactory, containerProperties);
 
     return new GenericTestConsumer<>(container, partitionCount);

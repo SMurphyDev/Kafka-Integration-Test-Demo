@@ -8,25 +8,24 @@ import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.kafka.test.utils.ContainerTestUtils;
 
-public class GenericTestConsumer<T> {
-  private final BlockingQueue<ConsumerRecord<String, T>> consumerRecords;
-  private final KafkaMessageListenerContainer<String, T> container;
+public class GenericTestConsumer<K, V> {
+  private final BlockingQueue<ConsumerRecord<K, V>> consumerRecords;
+  private final KafkaMessageListenerContainer<K, V> container;
   private final int partitionCount;
 
-  public GenericTestConsumer(
-      KafkaMessageListenerContainer<String, T> container, int partitionCount) {
+  public GenericTestConsumer(KafkaMessageListenerContainer<K, V> container, int partitionCount) {
     consumerRecords = new LinkedBlockingQueue<>();
     this.container = container;
     this.partitionCount = partitionCount;
   }
 
-  public ConsumerRecord<String, T> getNextRecord() throws InterruptedException {
+  public ConsumerRecord<K, V> getNextRecord() throws InterruptedException {
     return consumerRecords.poll(10, TimeUnit.SECONDS);
   }
 
   public void start() throws IllegalStateException {
     container.setupMessageListener(
-        (MessageListener<String, T>)
+        (MessageListener<K, V>)
             record -> {
               consumerRecords.add(record);
             });
