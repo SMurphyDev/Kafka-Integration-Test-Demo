@@ -37,7 +37,7 @@ I create a person object and use `GenericTestProducer` to write to *in-person*, 
 
 This class handles the configuration for `GenericTestProducer`. It gives us two advantages:
 
-1. I can choose whether to depend on an auto configured `ConsumerFactory` to create my test consumer or create a new one based on a provided config map.
+1. I can choose whether to depend on an auto configured `ConsumerFactory` or to create my test consumer or create a new one based on a provided config map.
 2. I can easily create a `GenericTestConsumer` any key and value types.
 
 ### The GenericTestProducer
@@ -50,13 +50,13 @@ The `GenericTestConsumerFactory` allows me to create a `KafkaMessageListnerConta
 
 The `KafkaMessageListnerContainer` is the piece which actually listens on the topic we are testing. On it's own though its not very useful. I only configure it here, in the `GenericTestConsumer` I've built the additional machinery which makes this valuable.
 
-Like the `GenericTestProducerFactory` it gives me options for configuring the consumer.
+Like the `GenericTestProducerFactory`, it gives me options for configuring the consumer.
 
 ### The GenericTestConsumer
 
 The `GenericTestConsumer` takes `KafkaMessageListnerContainer` passed in from the `GenericTestConsumerFactory` and adds some extra goodies which will let us read topics from our test. In the constructor I set up a `BlockingQueue` which I use to hold messages recieved by the listener. A `BlockingQueue` is a much better choice than a standard `List` type here becuase the head of the queue may be empty when I initially try to read it, because our data must make a round trip through two kafka topics and my application. With this type I can block until the expected record is present.
 
-In the `start()` method I set up a lister callback on `KafkaMessageListnerContainer` which will populate the `BlockingQueue` as the listener recieves records from kafka. Then I wait until all partions on the topic are assigned to my listner.
+In the `start()` method I set up a lister callback on `KafkaMessageListnerContainer` which will populate the `BlockingQueue` as the listener recieves records from kafka. Then I wait until all partitions on the topic are assigned to my listner.
 
 Finally `getNextRecord()` polls the queue for the records recieved, waiting up to 10 seconds before failing with an exception.
 
