@@ -5,9 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.smurphydev.config.ConfigProperties;
 import com.smurphydev.dto.Person;
 import com.smurphydev.fixtures.GenericTestConsumer;
-import com.smurphydev.fixtures.GenericTestConsumerFactory;
 import com.smurphydev.fixtures.GenericTestProducer;
-import com.smurphydev.fixtures.GenericTestProducerFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -31,8 +29,6 @@ import org.springframework.test.annotation.DirtiesContext;
 public class KafkaIntegrationWithExplicitConfigTest {
 
   @Autowired private ConfigProperties config;
-  @Autowired private GenericTestConsumerFactory<UUID, Person> personConsumerFactory;
-  @Autowired private GenericTestProducerFactory<UUID, Person> personProducerFactory;
   @Autowired private EmbeddedKafkaBroker embeddedKafkaBroker;
 
   private static Map<String, Object> personConsumerConfig;
@@ -43,6 +39,7 @@ public class KafkaIntegrationWithExplicitConfigTest {
 
   @BeforeAll
   public static void testConsumerAndProducerConfiguration() {
+    // Test producer Config
     personProducerConfig = new HashMap<>();
     personProducerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
     personProducerConfig.put(
@@ -52,6 +49,7 @@ public class KafkaIntegrationWithExplicitConfigTest {
         ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
         org.springframework.kafka.support.serializer.JsonSerializer.class);
 
+    // Test consumer config
     personConsumerConfig = new HashMap<>();
     personConsumerConfig.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
     personConsumerConfig.put(ConsumerConfig.GROUP_ID_CONFIG, "integration-test");
@@ -67,10 +65,12 @@ public class KafkaIntegrationWithExplicitConfigTest {
 
   @BeforeEach
   public void setUp() {
-    personProducer = personProducerFactory.getTestProducerWithConfig(personProducerConfig);
-    // We consume the producer topic as this is the topic our application writes to.
+    // Create producer
+    personProducer = new GenericTestProducer<UUID, Person>(personProducerConfig);
+
+    // Create Consumer
     personConsumer =
-        personConsumerFactory.getTestConsumerWithConfig(
+        new GenericTestConsumer<UUID, Person>(
             personConsumerConfig,
             config.getProducerTopic(),
             embeddedKafkaBroker.getPartitionsPerTopic());

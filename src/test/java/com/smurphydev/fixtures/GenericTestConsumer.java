@@ -1,9 +1,12 @@
 package com.smurphydev.fixtures;
 
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.kafka.test.utils.ContainerTestUtils;
@@ -13,10 +16,14 @@ public class GenericTestConsumer<K, V> {
   private final KafkaMessageListenerContainer<K, V> container;
   private final int partitionCount;
 
-  public GenericTestConsumer(KafkaMessageListenerContainer<K, V> container, int partitionCount) {
+  public GenericTestConsumer(
+      final Map<String, Object> config, final String topic, final int partitionCount) {
     consumerRecords = new LinkedBlockingQueue<>();
-    this.container = container;
     this.partitionCount = partitionCount;
+
+    DefaultKafkaConsumerFactory<K, V> consumerFactory = new DefaultKafkaConsumerFactory<>(config);
+    ContainerProperties containerProperties = new ContainerProperties(topic);
+    this.container = new KafkaMessageListenerContainer<>(consumerFactory, containerProperties);
   }
 
   public ConsumerRecord<K, V> getNextRecord() throws InterruptedException {
