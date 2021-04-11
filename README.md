@@ -27,7 +27,7 @@ Due to `@DirtiesContext` giving me a new broker instance each run I need to crea
 
 ### The Tear Down
 
-This is pretty forward, I close the listner and set `personConsumer` & `personProducer` to null so the garbage collector can clean them up.
+This is straight forward, I close the listner and set `personConsumer` & `personProducer` to null so the garbage collector can clean them up.
 
 ### The Test
 
