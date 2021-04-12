@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
@@ -60,7 +61,7 @@ public class KafkaIntegrationWithExplicitConfigTest {
     personConsumerConfig.put(
         ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
         org.springframework.kafka.support.serializer.JsonDeserializer.class);
-    personConsumerConfig.put("spring.json.trusted.packages", "com.smurphydev.dto");
+    personConsumerConfig.put(JsonDeserializer.TRUSTED_PACKAGES, "com.smurphydev.dto");
   }
 
   @BeforeEach
