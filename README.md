@@ -23,7 +23,7 @@ This is where the fun is. The first thing I do is pull in the config properties.
 
 ### The Set Up
 
-Due to `@DirtiesContext` giving me a new broker instance each run I need to create a new instance of `GenericTestConsumer` & `GenericTestProducer`. Both are explicitly configured in a `@BeforeAll` annotated method. This keeps the configuration of my testing consumers & producers independent from the configuration for the application under test.
+Due to `@DirtiesContext` giving me a new broker instance each run, I need to create a new instance of `GenericTestConsumer` & `GenericTestProducer`. Both are explicitly configured in a `@BeforeAll` annotated method. This keeps the configuration of my testing consumers & producers independent from the configuration for the application under test.
 
 ### The Tear Down
 
